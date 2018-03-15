@@ -4,6 +4,8 @@
 #include <iostream>
 
 #include <QMainWindow>
+#include <QDir>
+#include <QMessageBox>
 
 #include <pcl/point_cloud.h>
 #include <pcl/io/pcd_io.h>
@@ -12,6 +14,8 @@
 #include <pcl/common/file_io.h>
 
 #include <vtkRenderWindow.h>
+
+#include "qstring_change.hpp"
 
 typedef pcl::PointXYZRGBA PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
@@ -36,7 +40,8 @@ private slots:
 protected:
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
     PointCloudT::Ptr cloud;
-//    std::string datapath;
+    QDir dir;
+    std::string datapath;
 //    std::vector<std::string> filesname;
 //    int fileindex;
 

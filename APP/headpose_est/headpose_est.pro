@@ -28,7 +28,8 @@ SOURCES += \
         headpose.cpp
 
 HEADERS += \
-        headpose.h
+        headpose.h \
+    qstring_change.hpp
 
 FORMS += \
         headpose.ui
