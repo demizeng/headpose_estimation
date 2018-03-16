@@ -9,6 +9,8 @@ include_directories (${PCL_INCLUDE_DIRS})
 link_directories    (${PCL_LIBRARY_DIRS})
 add_definitions     (${PCL_DEFINITIONS})
 
+add_subdirectory(preprocess)
+
 set  (project_SOURCES main.cpp headpose.cpp)
 set  (project_HEADERS headpose.h)
 set  (project_FORMS   headpose.ui)
@@ -24,5 +26,5 @@ ADD_EXECUTABLE  (headpose_est ${project_SOURCES}
                                 ${project_FORMS_HEADERS}
                                 ${project_HEADERS_MOC})
 
-TARGET_LINK_LIBRARIES (headpose_est ${QT_LIBRARIES} ${PCL_LIBRARIES} ${VTK_LIBRARIES})
+TARGET_LINK_LIBRARIES (headpose_est ${QT_LIBRARIES} ${PCL_LIBRARIES} ${VTK_LIBRARIES} preprocess)
 

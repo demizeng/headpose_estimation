@@ -1,5 +1,5 @@
-#ifndef QSTRING_CHANGE_HPP
-#define QSTRING_CHANGE_HPP
+#ifndef QSTRING_CHANGE_HPP_
+#define QSTRING_CHANGE_HPP_
 
 #include <iostream>
 #include <QString>
@@ -15,4 +15,4 @@ static std::string qstr2str(const QString qstr)
     return std::string(cdata);
 }
 
-#endif // QSTRING_CHANGE_HPP
+#endif // QSTRING_CHANGE_HPP_
