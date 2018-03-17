@@ -15,12 +15,15 @@
 #include <pcl/common/file_io.h>
 
 #include <vtkRenderWindow.h>
+#include <Eigen/Core>
 
-#include "qstring_change.hpp"
+#include "useful_tools.hpp"
 #include "preprocess/preprocess.h"
+#include "registration/registration.h"
 
 typedef pcl::PointXYZRGBA PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
+typedef pcl::visualization::PointCloudColorHandlerCustom<PointT> ColorHandlerT;
 
 namespace Ui {
 class headpose;
@@ -55,11 +58,15 @@ protected:
     PointCloudT::Ptr preprocess_cloud;
     PointCloudT::Ptr src_cloud;
     PointCloudT::Ptr tgt_cloud;
+    PointCloudT::Ptr final_cloud;
     QDir dir;
     std::string datapath;
     QStringList choose_pcd_name;
     QStringList src_name;
     QStringList tgt_name;
+    Eigen::Matrix4f final_transformation;
+    Eigen::Vector3f ANGLE_result;
+    registration myreg;
 //    std::vector<std::string> filesname;
 //    int fileindex;
 

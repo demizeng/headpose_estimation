@@ -26,12 +26,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         headpose.cpp \
-    preprocess/preprocess.cpp
+    preprocess/preprocess.cpp \
+    registration/registration.cpp
 
 HEADERS += \
         headpose.h \
-    qstring_change.hpp \
-    preprocess/preprocess.h
+    preprocess/preprocess.h \
+    registration/registration.h \
+    useful_tools.hpp
 
 FORMS += \
         headpose.ui
