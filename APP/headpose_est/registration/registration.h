@@ -13,6 +13,7 @@
 #include <pcl/registration/ia_ransac.h>
 #include <pcl/registration/icp.h>
 #include <pcl/registration/ndt.h>
+#include <pcl/registration/transforms.h>
 #include <Eigen/Core>
 #include <pcl/registration/super4pcs.h>
 #include <super4pcs/shared4pcs.h>

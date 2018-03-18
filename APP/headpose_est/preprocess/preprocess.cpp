@@ -15,8 +15,9 @@ preprocess::preprocess()
 //{
 
 //}
-void preprocess::process(PointCloudTPtr &preprocess_cloud)
+double preprocess::process(PointCloudTPtr &preprocess_cloud)
 {
+    clock_t start=clock();
     pass.setInputCloud(preprocess_cloud);
     pass.filter(*preprocess_cloud);
     Static.setInputCloud(preprocess_cloud);
@@ -31,8 +32,9 @@ void preprocess::process(PointCloudTPtr &preprocess_cloud)
     condition.setCondition(and_cond);
     condition.setInputCloud(preprocess_cloud);
     condition.filter(*preprocess_cloud);
+    clock_t end=clock();
     std::cout<<"after filtered: "<<preprocess_cloud->size()<<" points."<<std::endl;
-
+    return (double)(end-start)/(double)CLOCKS_PER_SEC;
 }
 
 preprocess::~preprocess()

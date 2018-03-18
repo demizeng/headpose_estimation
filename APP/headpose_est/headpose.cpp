@@ -7,6 +7,9 @@ headpose::headpose(QWidget *parent) :
     ui(new Ui::headpose)
 {
     ui->setupUi(this);
+    ui->label_red->setVisible(false);
+    ui->label_green->setVisible(false);
+    ui->label_blue->setVisible(false);
     dir.cd("../../");
     datapath="../../data/";
 //    fileindex=0;
@@ -23,7 +26,6 @@ headpose::headpose(QWidget *parent) :
     ui->qvtkWidget->update();
     viewer->initCameraParameters();
     viewer->setCameraPosition(0,0,0,0,-1,0);
-    viewer->addText("headpose estimation",10,10,1,0,0,0,"notice");
     viewer->addText("pitch              yaw               roll",10,20,1,0,0,0,"angle title");
     viewer->addText("ANGLE_result",10,30,1,0,0,0,"angle");
     ui->qvtkWidget->update();
@@ -48,6 +50,10 @@ headpose::~headpose()
 //data_collect has not completed
 void headpose::on_button_collect_clicked()
 {
+    ui->label_red->setVisible(false);
+    ui->label_green->setVisible(false);
+    ui->label_blue->setVisible(false);
+    ui->label_time->setText("");
     QString dataname=ui->edit_dataname->text();
     if(dataname.isEmpty())
     {
@@ -77,6 +83,10 @@ void headpose::on_button_collect_clicked()
 
 void headpose::on_button_choosePCD_clicked()
 {
+    ui->label_red->setVisible(false);
+    ui->label_green->setVisible(false);
+    ui->label_blue->setVisible(false);
+    ui->label_time->setText("");
     QFileDialog *choose_dialog=new QFileDialog(this);
     choose_dialog->setWindowTitle(QString::fromUtf8("选择点云数据"));
     choose_dialog->setDirectory("../../data/");
@@ -92,7 +102,6 @@ void headpose::on_button_choosePCD_clicked()
         ui->label_choosePCD->setText(choose_pcd_name[i].section("/",-2));
         pcl::io::loadPCDFile(qstr2str(choose_pcd_name[i]),*preprocess_cloud);
         viewer->removeAllPointClouds();
-        viewer->updateText("headpose estimation",10,10,1,0,0,0,"notice");
         viewer->updateText("pitch              yaw               roll",10,20,1,0,0,0,"angle title");
         viewer->updateText("ANGLE_result",10,30,1,0,0,0,"angle");
         viewer->addPointCloud<PointT>(preprocess_cloud,"preprocess_cloud");
@@ -102,24 +111,28 @@ void headpose::on_button_choosePCD_clicked()
 
 void headpose::on_button_preprocess_clicked()
 {
+    ui->label_red->setVisible(false);
+    ui->label_green->setVisible(false);
+    ui->label_blue->setVisible(false);
     if(choose_pcd_name.empty())
     {
         QMessageBox::information(this,QString::fromUtf8("提示"),QString::fromUtf8("请先选择待处理点云数据！"),QMessageBox::Yes);
         return;
     }
+    double preprocess_time=0.0;
     preprocess preprocessPCD;
     QString filtered_name=choose_pcd_name[0].section("/",-1);
     std::string filtered_folder=datapath+qstr2str(filtered_name.section("_",0,0))+"/";
     for(int i=0;i<choose_pcd_name.size();i++)
     {
          pcl::io::loadPCDFile(qstr2str(choose_pcd_name[i]),*preprocess_cloud);
-         preprocessPCD.process(preprocess_cloud);
+         preprocess_time=preprocessPCD.process(preprocess_cloud);
          filtered_name=choose_pcd_name[i].section("/",-1);
          filtered_name.insert(filtered_name.length()-7,"filtered_");
          pcl::io::savePCDFile(filtered_folder+"filtered/"+qstr2str(filtered_name),*preprocess_cloud);
 //         std::cout<<filtered_folder+"filtered/"+qstr2str(filtered_name)<<std::endl;
+         ui->label_time->setText(QString::number(preprocess_time,10,6));
          viewer->removeAllPointClouds();
-         viewer->updateText("headpose estimation",10,10,1,0,0,0,"notice");
          viewer->updateText("pitch              yaw               roll",10,20,1,0,0,0,"angle title");
          viewer->updateText("ANGLE_result",10,30,1,0,0,0,"angle");
          viewer->addPointCloud<PointT>(preprocess_cloud,"preprocess_cloud");
@@ -130,6 +143,10 @@ void headpose::on_button_preprocess_clicked()
 
 void headpose::on_button_src_clicked()
 {
+    ui->label_red->setVisible(false);
+    ui->label_green->setVisible(false);
+    ui->label_blue->setVisible(false);
+    ui->label_time->setText("");
     QFileDialog *src_dialog=new QFileDialog(this);
     src_dialog->setWindowTitle(QString::fromUtf8("选择源点云"));
     src_dialog->setDirectory("../../data/");
@@ -143,7 +160,6 @@ void headpose::on_button_src_clicked()
     ui->label_src->setText(src_name[0].section("/",-2));
     pcl::io::loadPCDFile(qstr2str(src_name[0]),*src_cloud);
     viewer->removeAllPointClouds();
-    viewer->updateText("headpose estimation",10,10,1,0,0,0,"notice");
     viewer->updateText("pitch              yaw               roll",10,20,1,0,0,0,"angle title");
     viewer->updateText("ANGLE_result",10,30,1,0,0,0,"angle");
     viewer->addPointCloud<PointT>(src_cloud,"src_cloud");
@@ -153,6 +169,10 @@ void headpose::on_button_src_clicked()
 
 void headpose::on_button_tgt_clicked()
 {
+    ui->label_red->setVisible(false);
+    ui->label_green->setVisible(false);
+    ui->label_blue->setVisible(false);
+    ui->label_time->setText("");
     QFileDialog *tgt_dialog=new QFileDialog(this);
     tgt_dialog->setWindowTitle(QString::fromUtf8("选择目标点云"));
     tgt_dialog->setDirectory("../../data/");
@@ -166,7 +186,6 @@ void headpose::on_button_tgt_clicked()
     ui->label_tgt->setText(tgt_name[0].section("/",-2));
     pcl::io::loadPCDFile(qstr2str(tgt_name[0]),*tgt_cloud);
     viewer->removeAllPointClouds();
-    viewer->updateText("headpose estimation",10,10,1,0,0,0,"notice");
     viewer->updateText("pitch              yaw               roll",10,20,1,0,0,0,"angle title");
     viewer->updateText("ANGLE_result",10,30,1,0,0,0,"angle");
     viewer->addPointCloud<PointT>(tgt_cloud,"tgt_cloud");
@@ -205,11 +224,15 @@ void headpose::on_button_registration_clicked()
         std::cout<<qstr2str(ui->comboBox->currentText())<<" takes "<<reg_time<<" seconds."<<std::endl;
         matrix2angle(final_transformation,ANGLE_result);
         std::string angles=std::to_string(ANGLE_result(0))+"  "+std::to_string(ANGLE_result(1))+"  "+std::to_string(ANGLE_result(2));
+        ui->label_red->setVisible(true);
+        ui->label_green->setVisible(true);
+        ui->label_blue->setVisible(true);
+        ui->label_time->setText(QString::number(reg_time,10,6));
         viewer->removeAllPointClouds();
         viewer->addPointCloud<PointT>(tgt_cloud,ColorHandlerT(tgt_cloud,255,0,0),"tgt_cloud");
         viewer->addPointCloud<PointT>(src_cloud,ColorHandlerT(src_cloud,0,255,0),"src_cloud");
         viewer->addPointCloud<PointT>(final_cloud,ColorHandlerT(final_cloud,0,0,255),"final_cloud");
-        viewer->updateText("red:source pointcloud ; green:target pointcloud ; blue:pointcloud after registration", 20,100,20,1,1,1,"notice");
+//        viewer->updateText("red:source pointcloud ; green:target pointcloud ; blue:pointcloud after registration", 20,100,20,1,1,1,"notice");
         viewer->updateText("pitch              yaw               roll",110,280,25,1,1,1,"angle title");
         viewer->updateText(angles,110,260,25,1,1,1,"angle");
         ui->qvtkWidget->update();

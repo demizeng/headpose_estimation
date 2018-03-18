@@ -72,6 +72,7 @@ double registration::do_sacia(PointCloudTPtr &src_cloud,PointCloudTPtr &tgt_clou
     sacia.align(*final_cloud);
     clock_t end=clock();
     final_transform=sacia.getFinalTransformation();
+    pcl::transformPointCloud(*src_cloud, *final_cloud, final_transform);
     return (double)(end-start)/(double)CLOCKS_PER_SEC;
 }
 
@@ -127,6 +128,7 @@ double registration::do_ndt(PointCloudTPtr &src_cloud,PointCloudTPtr &tgt_cloud,
     ndt.align(*final_cloud);
     clock_t end=clock();
     final_transform=ndt.getFinalTransformation();
+    pcl::transformPointCloud(*src_cloud, *final_cloud, final_transform);
     return (double)(end-start)/(double)CLOCKS_PER_SEC;
 }
 
@@ -152,10 +154,11 @@ double registration::do_s4pcs(PointCloudTPtr &src_cloud,PointCloudTPtr &tgt_clou
     s4pcs.options_.max_color_distance = -1; //-1 means don't use it
     s4pcs.options_.max_time_seconds = 100;
     s4pcs.options_.delta = 0.004;//0.005
-    s4pcs.setInputSource (src_cloud);
-    s4pcs.setInputTarget (tgt_cloud);
+    s4pcs.setInputSource (src_cloud_tmp);
+    s4pcs.setInputTarget (tgt_cloud_tmp);
     s4pcs.align (*final_cloud);
     clock_t end=clock();
     final_transform=s4pcs.getFinalTransformation();
+    pcl::transformPointCloud(*src_cloud, *final_cloud, final_transform);
     return (double)(end-start)/(double)CLOCKS_PER_SEC;
 }

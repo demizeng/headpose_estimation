@@ -9,6 +9,7 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/filters/conditional_removal.h>
+#include <time.h>
 
 
 class preprocess
@@ -25,7 +26,7 @@ public:
     preprocess();
 //    preprocess(PointCloudTPtr &preprocess_cloud);
     ~preprocess();
-    void process(PointCloudTPtr &preprocess_cloud);
+    double process(PointCloudTPtr &preprocess_cloud);
 
 private:
     Eigen::Vector4f minPT,maxPT;
