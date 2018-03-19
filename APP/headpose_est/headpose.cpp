@@ -126,6 +126,7 @@ void headpose::on_button_preprocess_clicked()
     std::string filtered_folder=datapath+qstr2str(filtered_name.section("_",0,0))+"/";
     for(int i=0;i<choose_pcd_name.size();i++)
     {
+         QCoreApplication::processEvents();
          pcl::io::loadPCDFile(qstr2str(choose_pcd_name[i]),*preprocess_cloud);
          preprocess_time=preprocessPCD.process(preprocess_cloud);
          filtered_name=choose_pcd_name[i].section("/",-1);
@@ -271,6 +272,7 @@ void headpose::on_button_show_clicked()
         return;
     }
      PointCloudT::Ptr show_cloud (new PointCloudT);
+
      std::vector<std::string> filesname;
      std::vector<std::string> show_filesname;
      std::string datas_folder=qstr2str(datas_name[0].section("/",-2,-2));
@@ -284,6 +286,7 @@ void headpose::on_button_show_clicked()
      final_transformation<<1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
      for (int i=0;i<filesname.size();i++)
      {
+         QCoreApplication::processEvents();
          src_cloud->clear();
          pcl::copyPointCloud(*tgt_cloud,*src_cloud);
          pcl::io::loadPCDFile(dataspath+filesname[i],*tgt_cloud);
@@ -292,12 +295,11 @@ void headpose::on_button_show_clicked()
          matrix2angle(final_transformation,ANGLE_result);
          std::string icp_angles=std::to_string(ANGLE_result(0))+"  "+std::to_string(ANGLE_result(1))+"  "+std::to_string(ANGLE_result(2));
          pcl::io::loadPCDFile(datapath+datas_folder+"/"+show_filesname[i],*show_cloud);
-         ui->label_time->setText(QString::number(icp_time,10,6));
          viewer->removeAllPointClouds();
          viewer->addPointCloud<PointT>(show_cloud,"show_cloud");
          viewer->updateText("pitch              yaw               roll",110,280,25,1,1,1,"angle title");
          viewer->updateText(icp_angles,110,260,25,1,1,1,"angle");
+         ui->label_time->setText(QString::number(icp_time,10,6));
          ui->qvtkWidget->update();
      }
-
 }
