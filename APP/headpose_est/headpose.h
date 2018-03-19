@@ -52,6 +52,10 @@ private slots:
 
     void on_button_registration_clicked();
 
+    void on_pushButton_clicked();
+
+    void on_button_show_clicked();
+
 protected:
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
     PointCloudT::Ptr collect_cloud;
@@ -64,6 +68,7 @@ protected:
     QStringList choose_pcd_name;
     QStringList src_name;
     QStringList tgt_name;
+    QStringList datas_name;
     Eigen::Matrix4f final_transformation;
     Eigen::Vector3f ANGLE_result;
     registration myreg;

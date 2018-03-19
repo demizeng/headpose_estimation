@@ -32,7 +32,10 @@ protected:
     PointCloudTPtr src_cloud_tmp;//if needs voxel_grid,use src_cloud_tmp will avoid destroying src_cloud
     PointCloudTPtr tgt_cloud_tmp;
     pcl::VoxelGrid<PointT> voxel_filter;
-
+    pcl::IterativeClosestPoint<PointT,PointT> icp;
+    pcl::SampleConsensusInitialAlignment<PointT,PointT, pcl::FPFHSignature33> sacia;
+    pcl::NormalDistributionsTransform<PointT,PointT> ndt;
+    pcl::Super4PCS<PointT,PointT> s4pcs;
 
 public:
     registration();
