@@ -12,9 +12,6 @@ headpose::headpose(QWidget *parent) :
     ui->label_blue->setVisible(false);
     dir.cd("../../");
     datapath="../../data/";
-//    fileindex=0;
-//    pcl::getAllPcdFilesInDirectory(datapath,filesname);
-//    std::cout<<"file size: "<<filesname.size()<<std::endl;
     collect_cloud.reset(new PointCloudT);
     preprocess_cloud.reset(new PointCloudT);
     src_cloud.reset(new PointCloudT);
@@ -24,6 +21,8 @@ headpose::headpose(QWidget *parent) :
     ui->qvtkWidget->SetRenderWindow(viewer->getRenderWindow());
     viewer->setupInteractor(ui->qvtkWidget->GetInteractor(),ui->qvtkWidget->GetRenderWindow());
     ui->qvtkWidget->update();
+    viewer->setCameraFieldOfView (1.02259994f);
+    viewer->setPosition (0, 0);
     viewer->initCameraParameters();
     viewer->setCameraPosition(0,0,0,0,-1,0);
     viewer->addText("pitch              yaw               roll",10,20,1,0,0,0,"angle title");
@@ -36,18 +35,12 @@ headpose::~headpose()
     delete ui;
 }
 
+void headpose::cloud_callback(const PointCloudT::ConstPtr &cloud)
+{
+    boost::mutex::scoped_lock lock(cloud_mutex_);
+    cloud_=cloud;
+}
 
-//void headpose::on_pushButton_clicked()
-//{
-//    std::cout<<"load pcd file: "<<filesname[fileindex]<<std::endl;
-//    pcl::io::loadPCDFile(datapath+filesname[fileindex],*collect_cloud);
-//    viewer->removeAllPointClouds();
-//    viewer->addPointCloud<PointT>(collect_cloud,"collect_cloud");
-//    ui->qvtkWidget->update();
-//    fileindex++;
-//}
-
-//data_collect has not completed
 void headpose::on_button_collect_clicked()
 {
     ui->label_red->setVisible(false);
@@ -69,16 +62,53 @@ void headpose::on_button_collect_clicked()
         dir.cd("../");
     }
     dir.cd("../");
-
-//    std::string namestring=qstr2str(dataname);
-//    std::cout<<namestring<<std::endl;
-//    char collect_index[3];
-//    sprintf(collect_index,"%03d",30);
-//    std::string collect_pcd_name=datapath+namestring+"/"+namestring+"_"+std::string(collect_index)+".pcd";
-//    std::cout<<collect_pcd_name<<std::endl;
-
-
-
+    std::string namestring=qstr2str(dataname);
+    char collect_index[3];
+    std::string collect_pcd_name;
+    int pcd_collected=0;
+    try
+    {
+        pcl::io::OpenNI2Grabber grabber;
+        boost::function<void (const PointCloudT::ConstPtr&) > cloud_cb = boost::bind (&headpose::cloud_callback,this, _1);
+        boost::signals2::connection cloud_connection = grabber.registerCallback (cloud_cb);
+        grabber.start ();
+        while (pcd_collected<100)
+        {
+            QCoreApplication::processEvents();
+            PointCloudT::ConstPtr cloud;
+            if (cloud_mutex_.try_lock ())
+            {
+                cloud_.swap (cloud);
+                cloud_mutex_.unlock ();
+            }
+            if(cloud)
+            {
+                sprintf(collect_index,"%03d",pcd_collected++);
+                collect_pcd_name=datapath+namestring+"/"+namestring+"_"+std::string(collect_index)+".pcd";
+                PointCloudT cloud_pp;
+                cloud_pp=*cloud;//pcl::PointCloud::ConstPtr ----> pcl::PointCloud
+                pcl::io::savePCDFileASCII(collect_pcd_name,cloud_pp);
+                if (!viewer->updatePointCloud (cloud, "OpenNICloud"))
+                {
+                   viewer->addPointCloud (cloud, "OpenNICloud");
+                   viewer->resetCameraViewpoint ("OpenNICloud");
+                   viewer->setCameraPosition (
+                     0,0,0,		// Position
+                     0,0,1,		// Viewpoint
+                     0,-1,0);	// Up
+                }
+                ui->qvtkWidget->update();
+            }
+        }
+        grabber.stop ();
+        cloud_connection.disconnect ();
+        QMessageBox::information(this,QString::fromUtf8("提示"),QString::fromUtf8("采集完成！数据位于")+str2qstr("data/"+namestring),QMessageBox::Yes);
+     }
+     catch (pcl::IOException& e)
+     {
+        pcl::console::print_error ("Failed to create a grabber: %s\n", e.what ());
+        return;
+     }
 }
 
 void headpose::on_button_choosePCD_clicked()
@@ -140,7 +170,6 @@ void headpose::on_button_preprocess_clicked()
          viewer->addPointCloud<PointT>(preprocess_cloud,"preprocess_cloud");
          ui->qvtkWidget->update();
     }
-
 }
 
 void headpose::on_button_src_clicked()

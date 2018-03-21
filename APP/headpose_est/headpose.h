@@ -9,13 +9,21 @@
 #include <QFileDialog>
 
 #include <pcl/point_cloud.h>
-#include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/openni2_grabber.h>
+#include <pcl/io/openni2/openni.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/visualization/boost.h>
 #include <pcl/common/file_io.h>
+#include <pcl/console/print.h>
 
 #include <vtkRenderWindow.h>
 #include <Eigen/Core>
+#include <boost/chrono.hpp>
+#include <boost/bind.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/signals2.hpp>
 
 #include "useful_tools.hpp"
 #include "preprocess/preprocess.h"
@@ -63,6 +71,8 @@ protected:
     PointCloudT::Ptr src_cloud;
     PointCloudT::Ptr tgt_cloud;
     PointCloudT::Ptr final_cloud;
+    boost::mutex cloud_mutex_;
+    PointCloudT::ConstPtr cloud_;
     QDir dir;
     std::string datapath;
     QStringList choose_pcd_name;
@@ -74,6 +84,7 @@ protected:
     registration myreg;
 //    std::vector<std::string> filesname;
 //    int fileindex;
+    void cloud_callback(const PointCloudT::ConstPtr& cloud);
 
 private:
     Ui::headpose *ui;

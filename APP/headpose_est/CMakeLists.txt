@@ -10,6 +10,8 @@ include_directories (${PCL_INCLUDE_DIRS})
 link_directories    (${PCL_LIBRARY_DIRS})
 add_definitions     (${PCL_DEFINITIONS})
 
+find_package(Threads)
+
 find_package(CUDA REQUIRED)
 INCLUDE(FindCUDA)
 include_directories(${CUDA_INCLUDE_DIRS})
@@ -38,5 +40,5 @@ ADD_EXECUTABLE  (headpose_est ${project_SOURCES}
                                 ${project_FORMS_HEADERS}
                                 ${project_HEADERS_MOC})
 
-TARGET_LINK_LIBRARIES (headpose_est ${QT_LIBRARIES} ${PCL_LIBRARIES} ${VTK_LIBRARIES} preprocess registration)
+TARGET_LINK_LIBRARIES (headpose_est ${QT_LIBRARIES} ${PCL_LIBRARIES} ${VTK_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} preprocess registration)
 
