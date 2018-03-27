@@ -13,7 +13,7 @@ registration::registration()
     we can choose between the N best matches at random. This increases the iterations necessary,
     but also makes the algorithm robust towards outlier matches.*/
     sacia.setCorrespondenceRandomness(3);
-    //sacia.setMaxCorrespondenceDistance (0.06);
+    sacia.setMaxCorrespondenceDistance (0.5);
 
     icp.setMaxCorrespondenceDistance (0.02);//0.04
     // Set the maximum number of iterations (criterion 1)
@@ -57,10 +57,10 @@ double registration::do_sacia(PointCloudTPtr &src_cloud,PointCloudTPtr &tgt_clou
     clock_t start=clock();
 
     //float leaf=0.01;
-    voxel_filter.setLeafSize(0.02,0.02,0.02);
+    voxel_filter.setLeafSize(0.001,0.001,0.001);
     voxel_filter.setInputCloud(src_cloud_tmp);
     voxel_filter.filter(*src_cloud_tmp);
-    voxel_filter.setLeafSize(0.01,0.01,0.01);
+    voxel_filter.setLeafSize(0.001,0.001,0.001);
     voxel_filter.setInputCloud(tgt_cloud_tmp);
     voxel_filter.filter(*tgt_cloud_tmp);
     std::cout<<"src_cloud: "<<src_cloud_tmp->size()<<" points;tgt_cloud: "<<tgt_cloud_tmp->size()<<" points."<<std::endl;
@@ -68,7 +68,7 @@ double registration::do_sacia(PointCloudTPtr &src_cloud,PointCloudTPtr &tgt_clou
     pcl::NormalEstimation<PointT,pcl::Normal> nomal;
     pcl::search::KdTree<PointT>::Ptr tree_nomal(new pcl::search::KdTree<PointT>());
     //nomal.setNumberOfThreads(4);
-    nomal.setRadiusSearch(0.02);
+    nomal.setRadiusSearch(0.01);//0.02
     nomal.setInputCloud(src_cloud_tmp);
     nomal.setSearchMethod(tree_nomal);
     pcl::PointCloud<pcl::Normal>::Ptr cloud_src_normals(new pcl::PointCloud< pcl::Normal>);
@@ -80,7 +80,7 @@ double registration::do_sacia(PointCloudTPtr &src_cloud,PointCloudTPtr &tgt_clou
     pcl::FPFHEstimation<PointT,pcl::Normal,pcl::FPFHSignature33> fpfh_est;
     pcl::search::KdTree<PointT>::Ptr tree_fpfh (new pcl::search::KdTree<PointT>);
     //fpfh_est.setNumberOfThreads(4);
-    fpfh_est.setRadiusSearch(0.05);
+    fpfh_est.setRadiusSearch(0.02);//0.05
     fpfh_est.setSearchMethod(tree_fpfh);
     fpfh_est.setInputCloud(src_cloud_tmp);
     fpfh_est.setInputNormals(cloud_src_normals);
