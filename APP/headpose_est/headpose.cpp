@@ -72,7 +72,7 @@ void headpose::on_button_collect_clicked()
         boost::function<void (const PointCloudT::ConstPtr&) > cloud_cb = boost::bind (&headpose::cloud_callback,this, _1);
         boost::signals2::connection cloud_connection = grabber.registerCallback (cloud_cb);
         grabber.start ();
-        while (pcd_collected<100)
+        while (pcd_collected<100)//100
         {
             QCoreApplication::processEvents();
             PointCloudT::ConstPtr cloud;

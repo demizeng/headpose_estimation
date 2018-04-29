@@ -2,19 +2,12 @@
 
 preprocess::preprocess()
 {
-
     pass.setFilterFieldName("z");
-    pass.setFilterLimits(0.5,1.1);//0.5,1.1
-//  pass.setFilterLimits(0.5,1.0);//for data_zjw series
-//  pass.setFilterLimits(0.5,1.1);//for person1 2 3
-    Static.setMeanK(200);//400(for data_zjw series)
-    Static.setStddevMulThresh(0.8);//数值越小留下的点越少,0.7
+    pass.setFilterLimits(0.7,1.3);
+    Static.setMeanK(100);
+    Static.setStddevMulThresh(1.5);
 
 }
-//preprocess::preprocess(PointCloudTPtr &preprocess_cloud)
-//{
-
-//}
 double preprocess::process(PointCloudTPtr &preprocess_cloud)
 {
     clock_t start=clock();

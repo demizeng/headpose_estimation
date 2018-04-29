@@ -85,6 +85,27 @@ protected:
 //    std::vector<std::string> filesname;
 //    int fileindex;
     void cloud_callback(const PointCloudT::ConstPtr& cloud);
+    int angle_table[19][3]={
+        {0,0,0},
+        {-9,0,0},
+        {-19,0,-1},
+        {-27,0,2},
+        {11,0,0},
+        {21,1,0},
+        {30,1,3},
+        {2,-12,3},
+        {2,-19,3},
+        {2,-28,3},
+        {3,9,1},
+        {4,20,1},
+        {3,29,2},
+        {2,1,-12},
+        {0,1,-20},
+        {1,1,-30},
+        {3,0,15},
+        {3,1,21},
+        {3,1,33}
+    };
 
 private:
     Ui::headpose *ui;
