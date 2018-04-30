@@ -12,6 +12,11 @@ headpose::headpose(QWidget *parent) :
     ui->label_blue->setVisible(false);
     dir.cd("../../");
     datapath="../../data/";
+    sacmode=1;
+    icpmode=1;
+    src_number=0;
+    tgt_number=0;
+    view_switch=0;
     collect_cloud.reset(new PointCloudT);
     preprocess_cloud.reset(new PointCloudT);
     src_cloud.reset(new PointCloudT);
@@ -25,8 +30,6 @@ headpose::headpose(QWidget *parent) :
     viewer->setPosition (0, 0);
     viewer->initCameraParameters();
     viewer->setCameraPosition(0,0,0,0,-1,0);
-    viewer->addText("pitch              yaw               roll",10,20,1,0,0,0,"angle title");
-    viewer->addText("ANGLE_result",10,30,1,0,0,0,"angle");
     ui->qvtkWidget->update();
 }
 
@@ -133,8 +136,6 @@ void headpose::on_button_choosePCD_clicked()
         ui->label_choosePCD->setText(choose_pcd_name[i].section("/",-2));
         pcl::io::loadPCDFile(qstr2str(choose_pcd_name[i]),*preprocess_cloud);
         viewer->removeAllPointClouds();
-        viewer->updateText("pitch              yaw               roll",10,20,1,0,0,0,"angle title");
-        viewer->updateText("ANGLE_result",10,30,1,0,0,0,"angle");
         viewer->addPointCloud<PointT>(preprocess_cloud,"preprocess_cloud");
         ui->qvtkWidget->update();
     }
@@ -165,8 +166,6 @@ void headpose::on_button_preprocess_clicked()
 //         std::cout<<filtered_folder+"filtered/"+qstr2str(filtered_name)<<std::endl;
          ui->label_time->setText(QString::number(preprocess_time,10,6));
          viewer->removeAllPointClouds();
-         viewer->updateText("pitch              yaw               roll",10,20,1,0,0,0,"angle title");
-         viewer->updateText("ANGLE_result",10,30,1,0,0,0,"angle");
          viewer->addPointCloud<PointT>(preprocess_cloud,"preprocess_cloud");
          ui->qvtkWidget->update();
     }
@@ -190,10 +189,13 @@ void headpose::on_button_src_clicked()
     }
     else return;
     ui->label_src->setText(src_name[0].section("/",-2));
+    QString src_name_f=src_name[0].section("/",-1);
+    int src_number_index=src_name_f.lastIndexOf("_");
+    src_name_f=src_name_f.mid(src_number_index+1,3);
+    bool ok;
+    src_number=src_name_f.toInt(&ok,10);
     pcl::io::loadPCDFile(qstr2str(src_name[0]),*src_cloud);
     viewer->removeAllPointClouds();
-    viewer->updateText("pitch              yaw               roll",10,20,1,0,0,0,"angle title");
-    viewer->updateText("ANGLE_result",10,30,1,0,0,0,"angle");
     viewer->addPointCloud<PointT>(src_cloud,"src_cloud");
     ui->qvtkWidget->update();
 
@@ -217,10 +219,13 @@ void headpose::on_button_tgt_clicked()
     }
     else return;
     ui->label_tgt->setText(tgt_name[0].section("/",-2));
+    QString tgt_name_f=tgt_name[0].section("/",-1);
+    int tgt_number_index=tgt_name_f.lastIndexOf("_");
+    tgt_name_f=tgt_name_f.mid(tgt_number_index+1,3);
+    bool ok;
+    tgt_number=tgt_name_f.toInt(&ok,10);
     pcl::io::loadPCDFile(qstr2str(tgt_name[0]),*tgt_cloud);
     viewer->removeAllPointClouds();
-    viewer->updateText("pitch              yaw               roll",10,20,1,0,0,0,"angle title");
-    viewer->updateText("ANGLE_result",10,30,1,0,0,0,"angle");
     viewer->addPointCloud<PointT>(tgt_cloud,"tgt_cloud");
     ui->qvtkWidget->update();
 
@@ -229,15 +234,19 @@ void headpose::on_button_tgt_clicked()
 void headpose::on_button_registration_clicked()
 {
     double reg_time=0.0;
+    icpmode=1;
+    if(tgt_number==3 || tgt_number==6 || tgt_number==9 || tgt_number==14)
+        sacmode=2;
+    else sacmode=1;
     int method_index=ui->comboBox->currentIndex();
 //    std::cout<<method_index<<" "<<qstr2str(ui->comboBox->currentText())<<std::endl;
     switch (method_index)
     {
     case 0:
-        reg_time=myreg.do_sacia(src_cloud,tgt_cloud,final_cloud,final_transformation);
+        reg_time=myreg.do_sacpre(src_cloud,tgt_cloud,final_cloud,final_transformation,sacmode);
         break;
     case 1:
-        reg_time=myreg.do_icp(src_cloud,tgt_cloud,final_cloud,final_transformation);
+        reg_time=myreg.do_icp(src_cloud,tgt_cloud,final_cloud,final_transformation,icpmode);
         break;
     case 2:
         reg_time=myreg.do_ndt(src_cloud,tgt_cloud,final_cloud,final_transformation);
@@ -256,7 +265,18 @@ void headpose::on_button_registration_clicked()
     {
         std::cout<<qstr2str(ui->comboBox->currentText())<<" takes "<<reg_time<<" seconds."<<std::endl;
         matrix2angle(final_transformation,ANGLE_result);
-        std::string angles=std::to_string(ANGLE_result(0))+"  "+std::to_string(ANGLE_result(1))+"  "+std::to_string(ANGLE_result(2));
+        Eigen::Vector3f real_angle,est_angle;
+        float error;
+        real_angle(0)=angle_table[tgt_number][0]-angle_table[src_number][0];
+        real_angle(1)=angle_table[tgt_number][1]-angle_table[src_number][1];
+        real_angle(2)=angle_table[tgt_number][2]-angle_table[src_number][2];
+        est_angle(0)=ANGLE_result(0)-angle_table[src_number][0];
+        est_angle(1)=ANGLE_result(1)-angle_table[src_number][1];
+        est_angle(2)=ANGLE_result(2)-angle_table[src_number][2];
+        error=computeerror(real_angle,est_angle);
+        std::string realangles=std::to_string(real_angle(0))+" , "+std::to_string(real_angle(1))+" , "+std::to_string(real_angle(2));
+        std::string estangles=std::to_string(est_angle(0))+" , "+std::to_string(est_angle(1))+" , "+std::to_string(est_angle(2));
+        std::string errors=std::to_string(error);
         ui->label_red->setVisible(true);
         ui->label_green->setVisible(true);
         ui->label_blue->setVisible(true);
@@ -265,70 +285,192 @@ void headpose::on_button_registration_clicked()
         viewer->addPointCloud<PointT>(tgt_cloud,ColorHandlerT(tgt_cloud,255,0,0),"tgt_cloud");
         viewer->addPointCloud<PointT>(src_cloud,ColorHandlerT(src_cloud,0,255,0),"src_cloud");
         viewer->addPointCloud<PointT>(final_cloud,ColorHandlerT(final_cloud,0,0,255),"final_cloud");
-//        viewer->updateText("red:source pointcloud ; green:target pointcloud ; blue:pointcloud after registration", 20,100,20,1,1,1,"notice");
-        viewer->updateText("pitch              yaw               roll",110,280,25,1,1,1,"angle title");
-        viewer->updateText(angles,110,260,25,1,1,1,"angle");
         ui->qvtkWidget->update();
+        ui->edit_realangle->setText(str2qstr(realangles));
+        ui->edit_estangle->setText(str2qstr(estangles));
+        ui->edit_error->setText(str2qstr(errors));
     }
 }
 
-void headpose::on_pushButton_clicked()
-{
-    QFileDialog *datas_dialog=new QFileDialog(this);
-    datas_dialog->setWindowTitle(QString::fromUtf8("选择点云数据集"));
-    datas_dialog->setDirectory("../../data/");
-    datas_dialog->setFileMode(QFileDialog::Directory);
-    datas_dialog->setViewMode(QFileDialog::Detail);
-    if(datas_dialog->exec()==QFileDialog::Accepted)
-    {
-        datas_name=datas_dialog->selectedFiles();
-    }
-    else return;
-//    std::string dataspath=qstr2str(datas_name[0]);
-//    std::cout<<dataspath<<std::endl;
-    ui->label_datasname->setText(datas_name[0].section("/",-3));
-}
+//void headpose::on_pushButton_clicked()
+//{
+//    QFileDialog *datas_dialog=new QFileDialog(this);
+//    datas_dialog->setWindowTitle(QString::fromUtf8("选择点云数据集"));
+//    datas_dialog->setDirectory("../../data/");
+//    datas_dialog->setFileMode(QFileDialog::Directory);
+//    datas_dialog->setViewMode(QFileDialog::Detail);
+//    if(datas_dialog->exec()==QFileDialog::Accepted)
+//    {
+//        datas_name=datas_dialog->selectedFiles();
+//    }
+//    else return;
+//    ui->label_datasname->setText(datas_name[0].section("/",-3));
+//}
 
-
-void headpose::on_button_show_clicked()
+void headpose::on_baseposeButton_clicked()
 {
     ui->label_red->setVisible(false);
     ui->label_green->setVisible(false);
     ui->label_blue->setVisible(false);
-    if(datas_name.empty())
+    ui->label_time->setText("");
+    QFileDialog *base_dialog=new QFileDialog(this);
+    base_dialog->setWindowTitle(QString::fromUtf8("选择基准姿态"));
+    base_dialog->setDirectory("../../data/");
+    base_dialog->setNameFilter(QString::fromUtf8("PCD files(*.pcd)"));
+    base_dialog->setViewMode(QFileDialog::Detail);
+    base_dialog->setFileMode(QFileDialog::ExistingFiles);
+    if(base_dialog->exec()==QFileDialog::Accepted)
     {
-        QMessageBox::information(this,QString::fromUtf8("提示"),QString::fromUtf8("请先选择待处理点云数据集！"),QMessageBox::Yes);
+        src_name=base_dialog->selectedFiles();
+    }
+    else return;
+    QString src_name_f=src_name[0].section("/",-1);
+    ui->label_bposename->setText(src_name_f);
+    int src_number_index=src_name_f.lastIndexOf("_");
+    src_name_f=src_name_f.mid(src_number_index+1,3);
+    bool ok;
+    src_number=src_name_f.toInt(&ok,10);
+    pcl::io::loadPCDFile(qstr2str(src_name[0]),*src_cloud);
+    viewer->removeAllPointClouds();
+    viewer->addPointCloud<PointT>(src_cloud,"bpose_cloud");
+    ui->qvtkWidget->update();
+}
+
+void headpose::on_objposeButton_clicked()
+{
+    ui->label_red->setVisible(false);
+    ui->label_green->setVisible(false);
+    ui->label_blue->setVisible(false);
+    ui->label_time->setText("");
+    QFileDialog *opose_dialog=new QFileDialog(this);
+    opose_dialog->setWindowTitle(QString::fromUtf8("选择目标姿态"));
+    opose_dialog->setDirectory("../../data/");
+    opose_dialog->setNameFilter(QString::fromUtf8("PCD files(*.pcd)"));
+    opose_dialog->setViewMode(QFileDialog::Detail);
+    opose_dialog->setFileMode(QFileDialog::ExistingFiles);
+    if(opose_dialog->exec()==QFileDialog::Accepted)
+    {
+        tgt_name=opose_dialog->selectedFiles();
+    }
+    else return;
+    QString tgt_name_f=tgt_name[0].section("/",-1);
+    ui->label_oposename->setText(tgt_name_f);
+    int tgt_number_index=tgt_name_f.lastIndexOf("_");
+    tgt_name_f=tgt_name_f.mid(tgt_number_index+1,3);
+    bool ok;
+    tgt_number=tgt_name_f.toInt(&ok,10);
+    pcl::io::loadPCDFile(qstr2str(tgt_name[0]),*tgt_cloud);
+    viewer->removeAllPointClouds();
+    viewer->addPointCloud<PointT>(tgt_cloud,"opose_cloud");
+    ui->qvtkWidget->update();
+}
+
+void headpose::on_button_show_clicked()
+{
+    if(src_name.empty() || tgt_name.empty())
+    {
+        QMessageBox::information(this,QString::fromUtf8("提示"),QString::fromUtf8("请先选择点云数据！"),QMessageBox::Yes);
         return;
     }
-     PointCloudT::Ptr show_cloud (new PointCloudT);
+    ui->edit_realangle->setText("");
+    ui->edit_estangle->setText("");
+    ui->edit_error->setText("");
+    double reg_time=0.0;
+    view_switch=0;
+    icpmode=2;
+    if(tgt_number==3)
+        sacmode=1;
+    else sacmode=2;
+    PointCloudT::Ptr middle_cloud (new PointCloudT);
+    Eigen::Matrix4f sac_trans;
+    reg_time=myreg.do_sacpre(src_cloud,tgt_cloud,middle_cloud,sac_trans,sacmode);
+    reg_time+=myreg.do_icp(middle_cloud,tgt_cloud,final_cloud,final_transformation,icpmode);
+    final_transformation=sac_trans*final_transformation;
+    if(!(reg_time==0.0))
+    {
+        std::cout<<qstr2str(ui->comboBox->currentText())<<" takes "<<reg_time<<" seconds."<<std::endl;
+        matrix2angle(final_transformation,ANGLE_result);
+        Eigen::Vector3f real_angle,est_angle;
+        float error;
+        real_angle(0)=angle_table[tgt_number][0]-angle_table[src_number][0];
+        real_angle(1)=angle_table[tgt_number][1]-angle_table[src_number][1];
+        real_angle(2)=angle_table[tgt_number][2]-angle_table[src_number][2];
+        est_angle(0)=ANGLE_result(0)-angle_table[src_number][0];
+        est_angle(1)=ANGLE_result(1)-angle_table[src_number][1];
+        est_angle(2)=ANGLE_result(2)-angle_table[src_number][2];
+        error=computeerror(real_angle,est_angle);
+        std::string realangles=std::to_string(real_angle(0))+" , "+std::to_string(real_angle(1))+" , "+std::to_string(real_angle(2));
+        std::string estangles=std::to_string(est_angle(0))+" , "+std::to_string(est_angle(1))+" , "+std::to_string(est_angle(2));
+        std::string errors=std::to_string(error);
+        ui->label_red->setVisible(true);
+        ui->label_green->setVisible(true);
+        ui->label_blue->setVisible(true);
+        ui->label_time->setText(QString::number(reg_time,10,6));
+        viewer->removeAllPointClouds();
+        viewer->addPointCloud<PointT>(tgt_cloud,ColorHandlerT(tgt_cloud,255,0,0),"tgtpose_cloud");
+        viewer->addPointCloud<PointT>(src_cloud,ColorHandlerT(src_cloud,0,255,0),"srcpose_cloud");
+        viewer->addPointCloud<PointT>(final_cloud,ColorHandlerT(final_cloud,0,0,255),"finalpose_cloud");
+        ui->qvtkWidget->update();
+        ui->edit_realangle->setText(str2qstr(realangles));
+        ui->edit_estangle->setText(str2qstr(estangles));
+        ui->edit_error->setText(str2qstr(errors));
+    }
 
-     std::vector<std::string> filesname;
-     std::vector<std::string> show_filesname;
-     std::string datas_folder=qstr2str(datas_name[0].section("/",-2,-2));
-     std::string dataspath=datapath+datas_folder+"/filtered/";
-     double icp_time=0.0;
-     pcl::getAllPcdFilesInDirectory(dataspath,filesname);
-     pcl::getAllPcdFilesInDirectory(datapath+datas_folder+"/",show_filesname);
-     pcl::io::loadPCDFile(dataspath+filesname[0],*src_cloud);
-     pcl::io::loadPCDFile(dataspath+filesname[0],*tgt_cloud);
-     Eigen::Matrix4f icp_trans;
-     final_transformation<<1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
-     for (int i=0;i<filesname.size();i++)
-     {
-         QCoreApplication::processEvents();
-         src_cloud->clear();
-         pcl::copyPointCloud(*tgt_cloud,*src_cloud);
-         pcl::io::loadPCDFile(dataspath+filesname[i],*tgt_cloud);
-         icp_time=myreg.do_icp(src_cloud,tgt_cloud,final_cloud,icp_trans);
-         final_transformation=icp_trans*final_transformation;
-         matrix2angle(final_transformation,ANGLE_result);
-         std::string icp_angles=std::to_string(ANGLE_result(0))+"  "+std::to_string(ANGLE_result(1))+"  "+std::to_string(ANGLE_result(2));
-         pcl::io::loadPCDFile(datapath+datas_folder+"/"+show_filesname[i],*show_cloud);
-         viewer->removeAllPointClouds();
-         viewer->addPointCloud<PointT>(show_cloud,"show_cloud");
-         viewer->updateText("pitch              yaw               roll",110,280,25,1,1,1,"angle title");
-         viewer->updateText(icp_angles,110,260,25,1,1,1,"angle");
-         ui->label_time->setText(QString::number(icp_time,10,6));
-         ui->qvtkWidget->update();
-     }
+//     PointCloudT::Ptr show_cloud (new PointCloudT);
+//     std::vector<std::string> filesname;
+//     std::vector<std::string> show_filesname;
+//     std::string datas_folder=qstr2str(datas_name[0].section("/",-2,-2));
+//     std::string dataspath=datapath+datas_folder+"/filtered/";
+//     double icp_time=0.0;
+//     pcl::getAllPcdFilesInDirectory(dataspath,filesname);
+//     pcl::getAllPcdFilesInDirectory(datapath+datas_folder+"/",show_filesname);
+//     pcl::io::loadPCDFile(dataspath+filesname[0],*src_cloud);
+//     pcl::io::loadPCDFile(dataspath+filesname[0],*tgt_cloud);
+//     Eigen::Matrix4f icp_trans;
+//     final_transformation<<1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;
+//     for (int i=0;i<filesname.size();i++)
+//     {
+//         QCoreApplication::processEvents();
+//         src_cloud->clear();
+//         pcl::copyPointCloud(*tgt_cloud,*src_cloud);
+//         pcl::io::loadPCDFile(dataspath+filesname[i],*tgt_cloud);
+//         icp_time=myreg.do_icp(src_cloud,tgt_cloud,final_cloud,icp_trans);
+//         final_transformation=icp_trans*final_transformation;
+//         matrix2angle(final_transformation,ANGLE_result);
+//         std::string icp_angles=std::to_string(ANGLE_result(0))+"  "+std::to_string(ANGLE_result(1))+"  "+std::to_string(ANGLE_result(2));
+//         pcl::io::loadPCDFile(datapath+datas_folder+"/"+show_filesname[i],*show_cloud);
+//         viewer->removeAllPointClouds();
+//         viewer->addPointCloud<PointT>(show_cloud,"show_cloud");
+//         ui->label_time->setText(QString::number(icp_time,10,6));
+//         ui->qvtkWidget->update();
+//     }
+}
+
+void headpose::on_button_switch_clicked()
+{
+    if(tgt_name.empty())
+        return;
+    QString switch_data_path=tgt_name[0];
+    int filter_index=switch_data_path.indexOf("filtered");
+    switch_data_path.remove(filter_index,9);
+    filter_index=switch_data_path.indexOf("filtered");
+    switch_data_path.remove(filter_index,9);
+    if(view_switch==0)
+    {
+        PointCloudT::Ptr switch_cloud (new PointCloudT);
+        pcl::io::loadPCDFile(qstr2str(switch_data_path),*switch_cloud);
+        viewer->removeAllPointClouds();
+        viewer->addPointCloud<PointT>(switch_cloud,"switch_cloud");
+        ui->qvtkWidget->update();
+        view_switch=1;
+    }
+    else
+    {
+        viewer->removeAllPointClouds();
+        viewer->addPointCloud<PointT>(tgt_cloud,ColorHandlerT(tgt_cloud,255,0,0),"tgtpose_cloud");
+        viewer->addPointCloud<PointT>(src_cloud,ColorHandlerT(src_cloud,0,255,0),"srcpose_cloud");
+        viewer->addPointCloud<PointT>(final_cloud,ColorHandlerT(final_cloud,0,0,255),"finalpose_cloud");
+        ui->qvtkWidget->update();
+        view_switch=0;
+    }
 }

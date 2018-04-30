@@ -1,5 +1,5 @@
-#ifndef QSTRING_CHANGE_HPP_
-#define QSTRING_CHANGE_HPP_
+#ifndef USEFUL_TOOLS_HPP_
+#define USEFUL_TOOLS_HPP_
 
 #include <iostream>
 #include <QString>
@@ -48,4 +48,10 @@ static void matrix2angle (Eigen::Matrix4f &result_trans,Eigen::Vector3f &result_
   result_angle<<ax,ay,az;
 }
 
-#endif // QSTRING_CHANGE_HPP_
+static float computeerror(Eigen::Vector3f real_angle,Eigen::Vector3f est_angle)
+{
+    return sqrt((pow((est_angle(0)-real_angle(0)),2)+pow((est_angle(1)-real_angle(1)),2)+pow((est_angle(2)-real_angle(2)),2))/3);
+
+}
+
+#endif // USEFUL_TOOLS_HPP_

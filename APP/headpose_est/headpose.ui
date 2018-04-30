@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1380</width>
-    <height>860</height>
+    <height>900</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <x>370</x>
       <y>45</y>
       <width>980</width>
-      <height>770</height>
+      <height>750</height>
      </rect>
     </property>
    </widget>
@@ -333,7 +333,7 @@
       <x>30</x>
       <y>700</y>
       <width>300</width>
-      <height>121</height>
+      <height>175</height>
      </rect>
     </property>
     <property name="title">
@@ -362,8 +362,8 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>80</y>
-       <width>270</width>
+       <y>130</y>
+       <width>150</width>
        <height>30</height>
       </rect>
      </property>
@@ -371,7 +371,7 @@
       <string>演示</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="baseposeButton">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -381,10 +381,10 @@
       </rect>
      </property>
      <property name="text">
-      <string>选择数据</string>
+      <string>基准姿态</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_datasname">
+    <widget class="QLabel" name="label_bposename">
      <property name="geometry">
       <rect>
        <x>120</x>
@@ -395,6 +395,45 @@
      </property>
      <property name="text">
       <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="objposeButton">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>80</y>
+       <width>90</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>目标姿态</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_oposename">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>80</y>
+       <width>170</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="button_switch">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>130</y>
+       <width>95</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>切换视图</string>
      </property>
     </widget>
    </widget>
@@ -471,6 +510,84 @@
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_bposename_2">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>810</y>
+      <width>200</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>真实角度：(x,y,z)</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_bposename_3">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>810</y>
+      <width>200</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>估计角度：(x,y,z)</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_bposename_4">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>810</y>
+      <width>200</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>误差（度）：</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="edit_realangle">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>840</y>
+      <width>250</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="textInteractionFlags">
+     <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="edit_estangle">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>840</y>
+      <width>250</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="textInteractionFlags">
+     <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="edit_error">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>840</y>
+      <width>120</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="textInteractionFlags">
+     <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
     </property>
    </widget>
   </widget>

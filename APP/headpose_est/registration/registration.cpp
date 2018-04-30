@@ -100,7 +100,7 @@ double registration::do_sacpre(PointCloudTPtr &src_cloud,PointCloudTPtr &tgt_clo
     sacpre.setTargetFeatures(fpfhs_tgt);
     sacpre.align(*final_cloud);
     clock_t end=clock();
-    final_transform=sacia.getFinalTransformation();
+    final_transform=sacpre.getFinalTransformation();
     return (double)(end-start)/(double)CLOCKS_PER_SEC;
 }
 

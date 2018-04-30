@@ -60,9 +60,15 @@ private slots:
 
     void on_button_registration_clicked();
 
-    void on_pushButton_clicked();
+//    void on_pushButton_clicked();
 
     void on_button_show_clicked();
+
+    void on_baseposeButton_clicked();
+
+    void on_objposeButton_clicked();
+
+    void on_button_switch_clicked();
 
 protected:
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
@@ -78,7 +84,6 @@ protected:
     QStringList choose_pcd_name;
     QStringList src_name;
     QStringList tgt_name;
-    QStringList datas_name;
     Eigen::Matrix4f final_transformation;
     Eigen::Vector3f ANGLE_result;
     registration myreg;
@@ -106,6 +111,8 @@ protected:
         {3,1,21},
         {3,1,33}
     };
+    int sacmode,icpmode,src_number,tgt_number;
+    int view_switch;
 
 private:
     Ui::headpose *ui;
