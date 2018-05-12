@@ -30,6 +30,7 @@ headpose::headpose(QWidget *parent) :
     viewer->setPosition (0, 0);
     viewer->initCameraParameters();
     viewer->setCameraPosition(0,0,0,0,-1,0);
+//    viewer->addCoordinateSystem(0.1);
     ui->qvtkWidget->update();
 }
 
@@ -378,7 +379,7 @@ void headpose::on_button_show_clicked()
     double reg_time=0.0;
     view_switch=0;
     icpmode=2;
-    if(tgt_number==3)
+    if(tgt_number==3 || tgt_number==2)
         sacmode=1;
     else sacmode=2;
     PointCloudT::Ptr middle_cloud (new PointCloudT);

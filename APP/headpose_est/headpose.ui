@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>370</x>
-      <y>45</y>
+      <y>50</y>
       <width>980</width>
       <height>750</height>
      </rect>
@@ -120,7 +120,7 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>160</y>
+      <y>150</y>
       <width>300</width>
       <height>180</height>
      </rect>
@@ -191,13 +191,13 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>360</y>
+      <y>550</y>
       <width>300</width>
       <height>321</height>
      </rect>
     </property>
     <property name="title">
-     <string>配准</string>
+     <string>配准算法对比</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -293,7 +293,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>配准方法：</string>
+      <string>配准算法：</string>
      </property>
     </widget>
     <widget class="QComboBox" name="comboBox">
@@ -331,7 +331,7 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>700</y>
+      <y>340</y>
       <width>300</width>
       <height>175</height>
      </rect>
@@ -522,7 +522,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>真实角度：(x,y,z)</string>
+     <string>真实角度：(pitch,yaw,roll)</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_bposename_3">
@@ -535,7 +535,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>估计角度：(x,y,z)</string>
+     <string>估计角度：(pitch,yaw,roll)</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_bposename_4">
@@ -588,6 +588,25 @@
     </property>
     <property name="textInteractionFlags">
      <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+    </property>
+   </widget>
+   <widget class="Line" name="line_5">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>530</y>
+      <width>301</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <property name="lineWidth">
+     <number>3</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
     </property>
    </widget>
   </widget>

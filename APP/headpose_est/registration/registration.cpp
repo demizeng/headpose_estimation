@@ -5,21 +5,6 @@ registration::registration()
     src_cloud_tmp.reset(new PointCloudT);
     tgt_cloud_tmp.reset(new PointCloudT);
 
-    sacpre.setMaximumIterations(4000);
-    sacpre.setNumberOfSamples(3);
-    // Number of points to sample for generating/prerejecting a pose
-    sacpre.setCorrespondenceRandomness(5);
-    // Number of nearest features to use
-    sacpre.setSimilarityThreshold (0.8);
-    /*The alignment class uses the CorrespondenceRejectorPoly class for early elimination of bad poses based on pose-invariant
-     * geometric consistencies of the inter-distances between sampled points on the object and the scene. The closer this value
-     * is set to 1, the more greedy and thereby fast the algorithm becomes. However, this also increases the risk of eliminating
-     * good poses when noise is present.
-     * */
-    sacpre.setMaxCorrespondenceDistance (3.0f*0.001);
-    sacpre.setInlierFraction (0.3f);
-    // Required inlier fraction for accepting a pose hypothesis
-
     icp.setMaxCorrespondenceDistance (0.1);//0.04
     // Set the maximum number of iterations (criterion 1)
     icp.setMaximumIterations (1000);
@@ -89,11 +74,30 @@ double registration::do_sacpre(PointCloudTPtr &src_cloud,PointCloudTPtr &tgt_clo
     pcl::PointCloud<pcl::FPFHSignature33>::Ptr fpfhs_tgt(new pcl::PointCloud<pcl::FPFHSignature33>());
     fpfh_est.compute(*fpfhs_tgt);
 
+    pcl::SampleConsensusPrerejective<PointT,PointT,pcl::FPFHSignature33> sacpre;
+    sacpre.setMaximumIterations(4000);
     if(sacmode==2)
     {
         sacpre.setNumberOfSamples (4);
         sacpre.setCorrespondenceRandomness (2);
     }
+    else
+    {
+        sacpre.setNumberOfSamples(3);
+        // Number of points to sample for generating/prerejecting a pose
+        sacpre.setCorrespondenceRandomness(5);
+        // Number of nearest features to use
+    }
+    sacpre.setSimilarityThreshold (0.8);
+    /*The alignment class uses the CorrespondenceRejectorPoly class for early elimination of bad poses based on pose-invariant
+     * geometric consistencies of the inter-distances between sampled points on the object and the scene. The closer this value
+     * is set to 1, the more greedy and thereby fast the algorithm becomes. However, this also increases the risk of eliminating
+     * good poses when noise is present.
+     * */
+    sacpre.setMaxCorrespondenceDistance (3.0f*0.001);
+//    std::cout<<&sacpre<<std::endl;
+    sacpre.setInlierFraction (0.3f);
+    // Required inlier fraction for accepting a pose hypothesis
     sacpre.setInputSource(src_cloud);
     sacpre.setInputTarget(tgt_cloud);
     sacpre.setSourceFeatures(fpfhs_src);
