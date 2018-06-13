@@ -42,6 +42,9 @@ double registration::do_sacpre(PointCloudTPtr &src_cloud,PointCloudTPtr &tgt_clo
 {
     clock_t start=clock();
 
+    std::vector<int> indices; //保存去除的点的索引
+    pcl::removeNaNFromPointCloud(*src_cloud,*src_cloud, indices);
+    pcl::removeNaNFromPointCloud(*tgt_cloud,*tgt_cloud, indices);
     pcl::NormalEstimation<PointT,pcl::Normal> nomal;
     pcl::search::KdTree<PointT>::Ptr tree_nomal(new pcl::search::KdTree<PointT>());
     //nomal.setNumberOfThreads(4);
@@ -113,6 +116,7 @@ double registration::do_icp(PointCloudTPtr &src_cloud,PointCloudTPtr &tgt_cloud,
     clock_t start=clock();
     if(icpmode==2)
         icp.setMaxCorrespondenceDistance (0.003);
+    else icp.setMaxCorrespondenceDistance (0.1);
     icp.setInputSource(src_cloud);
     icp.setInputTarget(tgt_cloud);
     icp.align(*final_cloud);

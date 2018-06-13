@@ -17,6 +17,7 @@
 #include <pcl/visualization/boost.h>
 #include <pcl/common/file_io.h>
 #include <pcl/console/print.h>
+#include <pcl/registration/transforms.h>
 
 #include <vtkRenderWindow.h>
 #include <Eigen/Core>
@@ -28,6 +29,8 @@
 #include "useful_tools.hpp"
 #include "preprocess/preprocess.h"
 #include "registration/registration.h"
+#include <time.h>
+#include <fstream>
 
 typedef pcl::PointXYZRGBA PointT;
 typedef pcl::PointCloud<PointT> PointCloudT;
@@ -93,7 +96,7 @@ protected:
     int angle_table[19][3]={
         {0,0,0},
         {-9,0,0},
-        {-19,0,-1},
+        {-19,0,1},
         {-27,0,2},
         {11,0,0},
         {21,1,0},

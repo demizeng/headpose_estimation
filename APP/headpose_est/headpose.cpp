@@ -1,6 +1,7 @@
 #include "headpose.h"
 #include "../release/ui_headpose.h"
 #include <cstdio>
+#include <QProcess>
 
 headpose::headpose(QWidget *parent) :
     QMainWindow(parent),
@@ -110,6 +111,7 @@ void headpose::on_button_collect_clicked()
      }
      catch (pcl::IOException& e)
      {
+        QMessageBox::information(this,QString::fromUtf8("提示"),QString::fromUtf8("未发现可用的Kinect设备，无法采集数据!"));
         pcl::console::print_error ("Failed to create a grabber: %s\n", e.what ());
         return;
      }
@@ -240,28 +242,40 @@ void headpose::on_button_registration_clicked()
         sacmode=2;
     else sacmode=1;
     int method_index=ui->comboBox->currentIndex();
-//    std::cout<<method_index<<" "<<qstr2str(ui->comboBox->currentText())<<std::endl;
-    switch (method_index)
-    {
-    case 0:
-        reg_time=myreg.do_sacpre(src_cloud,tgt_cloud,final_cloud,final_transformation,sacmode);
-        break;
-    case 1:
-        reg_time=myreg.do_icp(src_cloud,tgt_cloud,final_cloud,final_transformation,icpmode);
-        break;
-    case 2:
-        reg_time=myreg.do_ndt(src_cloud,tgt_cloud,final_cloud,final_transformation);
-        break;
-    case 3:
-        reg_time=myreg.do_s4pcs(src_cloud,tgt_cloud,final_cloud,final_transformation);
-        break;
-    default:
-    {
-        QMessageBox::information(this,QString::fromUtf8("提示"),QString::fromUtf8("请先选择配准算法！"),QMessageBox::Yes);
-        return;
-    }
-        break;
-    }
+     if(method_index==0)
+     {
+        QStringList arguments2;
+        QString sacmode_str2=QString::number(sacmode,10);
+        arguments2<<src_name[0]<<tgt_name[0]<<sacmode_str2;
+        QProcess::execute("../../other/sac/sacpre",arguments2);
+        ifstream inputfile2;
+        inputfile2.open("sac.txt");
+        if (!inputfile2.is_open())
+            std::cout<<"can't open sac.txt"<<std::endl;
+        else
+        {
+            for (int m=0;m<4;m++)
+                for(int n=0;n<4;n++)
+                    inputfile2>>final_transformation(m,n);
+            inputfile2>>reg_time;
+        }
+        pcl::transformPointCloud(*src_cloud, *final_cloud, final_transformation);
+     }
+     else if (method_index==1) {
+         reg_time=myreg.do_icp(src_cloud,tgt_cloud,final_cloud,final_transformation,icpmode);
+     }
+     else if (method_index==2) {
+         reg_time=myreg.do_ndt(src_cloud,tgt_cloud,final_cloud,final_transformation);
+     }
+     else if (method_index==3) {
+         reg_time=myreg.do_s4pcs(src_cloud,tgt_cloud,final_cloud,final_transformation);
+     }
+     else
+     {
+         QMessageBox::information(this,QString::fromUtf8("提示"),QString::fromUtf8("请先选择配准算法！"),QMessageBox::Yes);
+         return;
+     }
+
     if(!(reg_time==0.0))
     {
         std::cout<<qstr2str(ui->comboBox->currentText())<<" takes "<<reg_time<<" seconds."<<std::endl;
@@ -381,14 +395,34 @@ void headpose::on_button_show_clicked()
     double reg_time=0.0;
     view_switch=0;
     icpmode=2;
-    if(tgt_number==3 || tgt_number==2)
+    if(tgt_number==3)
         sacmode=1;
     else sacmode=2;
-    PointCloudT::Ptr middle_cloud (new PointCloudT);
-    Eigen::Matrix4f sac_trans;
-    reg_time=myreg.do_sacpre(src_cloud,tgt_cloud,middle_cloud,sac_trans,sacmode);
-    reg_time+=myreg.do_icp(middle_cloud,tgt_cloud,final_cloud,final_transformation,icpmode);
-    final_transformation=sac_trans*final_transformation;
+
+    QStringList arguments;
+    QString sacmode_str=QString::number(sacmode,10);
+    arguments<<src_name[0]<<tgt_name[0]<<sacmode_str;
+//    clock_t startest=clock();
+    QProcess::execute("../../other/sacicp/sacpreicp",arguments);
+//    clock_t endest= clock();
+//    reg_time=(double)(endest-startest)/(double)CLOCKS_PER_SEC;
+    ifstream inputfile;
+    inputfile.open("sacicp.txt");
+    if (!inputfile.is_open())
+        std::cout<<"can't open sacicp.txt"<<std::endl;
+    else
+    {
+        for (int m=0;m<4;m++)
+            for(int n=0;n<4;n++)
+                inputfile>>final_transformation(m,n);
+        inputfile>>reg_time;
+    }
+    pcl::transformPointCloud(*src_cloud, *final_cloud, final_transformation);
+//    PointCloudT::Ptr middle_cloud (new PointCloudT);
+//    Eigen::Matrix4f sac_trans;
+//    reg_time=myreg.do_sacpre(src_cloud,tgt_cloud,middle_cloud,sac_trans,sacmode);
+//    reg_time+=myreg.do_icp(middle_cloud,tgt_cloud,final_cloud,final_transformation,icpmode);
+//    final_transformation=sac_trans*final_transformation;
     if(!(reg_time==0.0))
     {
         std::cout<<qstr2str(ui->comboBox->currentText())<<" takes "<<reg_time<<" seconds."<<std::endl;
