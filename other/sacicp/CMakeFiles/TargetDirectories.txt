@@ -1,3 +1,0 @@
-/home/zjw/myprojects/headpose_estimation/other/sacicp/CMakeFiles/rebuild_cache.dir
-/home/zjw/myprojects/headpose_estimation/other/sacicp/CMakeFiles/edit_cache.dir
-/home/zjw/myprojects/headpose_estimation/other/sacicp/CMakeFiles/sacpreicp.dir
