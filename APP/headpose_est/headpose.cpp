@@ -292,16 +292,16 @@ void headpose::on_button_registration_clicked()
         std::string realangles=std::to_string(real_angle(0))+" , "+std::to_string(real_angle(1))+" , "+std::to_string(real_angle(2));
         std::string estangles=std::to_string(est_angle(0))+" , "+std::to_string(est_angle(1))+" , "+std::to_string(est_angle(2));
         std::string errors=std::to_string(error);
-//        ui->label_red->setVisible(true);
-//        ui->label_green->setVisible(true);
-//        ui->label_blue->setVisible(true);
+        ui->label_red->setVisible(true);
+        ui->label_green->setVisible(true);
+        ui->label_blue->setVisible(true);
         ui->label_time->setText(QString::number(reg_time,10,6));
         viewer->removeAllPointClouds();
-//        viewer->addPointCloud<PointT>(tgt_cloud,ColorHandlerT(tgt_cloud,255,0,0),"tgt_cloud");
-//        viewer->addPointCloud<PointT>(src_cloud,ColorHandlerT(src_cloud,0,255,0),"src_cloud");
-//        viewer->addPointCloud<PointT>(final_cloud,ColorHandlerT(final_cloud,0,0,255),"final_cloud");
-        viewer->addPointCloud<PointT>(tgt_cloud,"tgt_cloud");
-        viewer->addPointCloud<PointT>(final_cloud,"final_cloud");
+        viewer->addPointCloud<PointT>(tgt_cloud,ColorHandlerT(tgt_cloud,255,0,0),"tgt_cloud");
+        viewer->addPointCloud<PointT>(src_cloud,ColorHandlerT(src_cloud,0,255,0),"src_cloud");
+        viewer->addPointCloud<PointT>(final_cloud,ColorHandlerT(final_cloud,0,0,255),"final_cloud");
+//        viewer->addPointCloud<PointT>(tgt_cloud,"tgt_cloud");
+//        viewer->addPointCloud<PointT>(final_cloud,"final_cloud");
         ui->qvtkWidget->update();
         ui->edit_realangle->setText(str2qstr(realangles));
         ui->edit_estangle->setText(str2qstr(estangles));
@@ -439,16 +439,16 @@ void headpose::on_button_show_clicked()
         std::string realangles=std::to_string(real_angle(0))+" , "+std::to_string(real_angle(1))+" , "+std::to_string(real_angle(2));
         std::string estangles=std::to_string(est_angle(0))+" , "+std::to_string(est_angle(1))+" , "+std::to_string(est_angle(2));
         std::string errors=std::to_string(error);
-//        ui->label_red->setVisible(true);
-//        ui->label_green->setVisible(true);
-//        ui->label_blue->setVisible(true);
+        ui->label_red->setVisible(true);
+        ui->label_green->setVisible(true);
+        ui->label_blue->setVisible(true);
         ui->label_time->setText(QString::number(reg_time,10,6));
         viewer->removeAllPointClouds();
-//        viewer->addPointCloud<PointT>(tgt_cloud,ColorHandlerT(tgt_cloud,255,0,0),"tgtpose_cloud");
-//        viewer->addPointCloud<PointT>(src_cloud,ColorHandlerT(src_cloud,0,255,0),"srcpose_cloud");
-//        viewer->addPointCloud<PointT>(final_cloud,ColorHandlerT(final_cloud,0,0,255),"finalpose_cloud");
-        viewer->addPointCloud<PointT>(tgt_cloud,"tgtpose_cloud");
-        viewer->addPointCloud<PointT>(final_cloud,"finalpose_cloud");
+        viewer->addPointCloud<PointT>(tgt_cloud,ColorHandlerT(tgt_cloud,255,0,0),"tgtpose_cloud");
+        viewer->addPointCloud<PointT>(src_cloud,ColorHandlerT(src_cloud,0,255,0),"srcpose_cloud");
+        viewer->addPointCloud<PointT>(final_cloud,ColorHandlerT(final_cloud,0,0,255),"finalpose_cloud");
+//        viewer->addPointCloud<PointT>(tgt_cloud,"tgtpose_cloud");
+//        viewer->addPointCloud<PointT>(final_cloud,"finalpose_cloud");
         ui->qvtkWidget->update();
         ui->edit_realangle->setText(str2qstr(realangles));
         ui->edit_estangle->setText(str2qstr(estangles));
@@ -506,11 +506,11 @@ void headpose::on_button_switch_clicked()
     else
     {
         viewer->removeAllPointClouds();
-//        viewer->addPointCloud<PointT>(tgt_cloud,ColorHandlerT(tgt_cloud,255,0,0),"tgtpose_cloud");
-//        viewer->addPointCloud<PointT>(src_cloud,ColorHandlerT(src_cloud,0,255,0),"srcpose_cloud");
-//        viewer->addPointCloud<PointT>(final_cloud,ColorHandlerT(final_cloud,0,0,255),"finalpose_cloud");
-        viewer->addPointCloud<PointT>(tgt_cloud,"tgtpose_cloud");
-        viewer->addPointCloud<PointT>(final_cloud,"finalpose_cloud");
+        viewer->addPointCloud<PointT>(tgt_cloud,ColorHandlerT(tgt_cloud,255,0,0),"tgtpose_cloud");
+        viewer->addPointCloud<PointT>(src_cloud,ColorHandlerT(src_cloud,0,255,0),"srcpose_cloud");
+        viewer->addPointCloud<PointT>(final_cloud,ColorHandlerT(final_cloud,0,0,255),"finalpose_cloud");
+//        viewer->addPointCloud<PointT>(tgt_cloud,"tgtpose_cloud");
+//        viewer->addPointCloud<PointT>(final_cloud,"finalpose_cloud");
         ui->qvtkWidget->update();
         view_switch=0;
     }
