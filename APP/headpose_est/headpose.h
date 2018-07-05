@@ -93,6 +93,7 @@ protected:
 //    std::vector<std::string> filesname;
 //    int fileindex;
     void cloud_callback(const PointCloudT::ConstPtr& cloud);
+    //real head pose of the sample data
     int angle_table[19][3]={
         {0,0,0},
         {-9,0,0},

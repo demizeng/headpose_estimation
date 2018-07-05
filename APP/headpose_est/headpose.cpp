@@ -258,6 +258,8 @@ void headpose::on_button_registration_clicked()
                 for(int n=0;n<4;n++)
                     inputfile2>>final_transformation(m,n);
             inputfile2>>reg_time;
+            inputfile2.close();
+            inputfile2.clear();
         }
         pcl::transformPointCloud(*src_cloud, *final_cloud, final_transformation);
      }
@@ -416,6 +418,8 @@ void headpose::on_button_show_clicked()
             for(int n=0;n<4;n++)
                 inputfile>>final_transformation(m,n);
         inputfile>>reg_time;
+        inputfile.close();
+        inputfile.clear();
     }
     pcl::transformPointCloud(*src_cloud, *final_cloud, final_transformation);
 //    PointCloudT::Ptr middle_cloud (new PointCloudT);
@@ -455,6 +459,7 @@ void headpose::on_button_show_clicked()
         ui->edit_error->setText(str2qstr(errors));
     }
 
+/****** for continus icp ***********/
 //     PointCloudT::Ptr show_cloud (new PointCloudT);
 //     std::vector<std::string> filesname;
 //     std::vector<std::string> show_filesname;

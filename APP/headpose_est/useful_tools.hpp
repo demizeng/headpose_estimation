@@ -6,6 +6,7 @@
 #include<math.h>
 #include <Eigen/Core>
 
+/************** useful functions **************/
 static QString str2qstr(const std::string str)
 {
     return QString::fromLocal8Bit(str.data());
@@ -17,6 +18,7 @@ static std::string qstr2str(const QString qstr)
     return std::string(cdata);
 }
 
+//convert the transformation to pose angle
 static void matrix2angle (Eigen::Matrix4f &result_trans,Eigen::Vector3f &result_angle)
 {
   double ax,ay,az;
